@@ -15,8 +15,9 @@
 
 import http from 'node:http'
 import { json } from './middlewares/json.js' // Para não dar erro module not found, colocar a extensão do arquivo .js no import, isso porque no package.json o type está como module
+import { Database } from './database.js'
 
-const users = []
+const database = new Database()
 
 const server =  http.createServer(async (req, res) => {
 
@@ -25,18 +26,23 @@ const server =  http.createServer(async (req, res) => {
    await json(req, res)
     
     if (method === 'GET' && url === '/users'){
+
+        const users = database.select('users')
+
         return res.end(JSON.stringify(users))
     }
 
     if (method === 'POST' && url === '/users'){
-
-        const { name, email } = req.body        
-
-        users.push({
+                
+        const { name, email } = req.body      
+        
+        const user = {
             id: 1,
             name,
             email
-        })
+        }
+
+        database.insert('users', user)
 
         return res.writeHead(201).end()
     }
